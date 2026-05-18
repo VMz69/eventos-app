@@ -50,3 +50,7 @@ proyecto-eventos-udb/
 │   └── types/                    # Interfaces TS
 │
 └── .env                          # Variables EXPO_PUBLIC_
+
+
+
+
