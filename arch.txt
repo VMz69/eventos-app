@@ -1,0 +1,52 @@
+# BACKEND
+
+
+🔥 FIRESTORE
+│
+├── 📁 Colección: usuarios
+│   ├── 📄 Documento: user_abc123
+│   │   ├── nombre: "VMz-Dev"
+│   │   └── email: "vmz@udb.edu.sv"
+│
+└── 📁 Colección: eventos
+    ├── 📄 Documento: evt_001
+    │   ├── titulo: "Torneo de Fútbol"
+    │   ├── descripcion: "Torneo relámpago..."
+    │   ├── fecha: "2026-10-24"
+    │   ├── hora: "09:00"
+    │   ├── ubicacion: "Cancha Principal"
+    │   ├── creadorId: "user_abc123"                <-- Otorga controles de Organizador
+    │   ├── asistentes: ["user_xyz987"]             <-- RSVP: IDs de quienes asisten
+    │   │
+    │   └── 📁 Sub-colección: comentarios
+    │       └── 📄 Documento: com_555
+    │           ├── usuarioId: "user_xyz987"
+    │           ├── texto: "¡Llevaré balones extra!"
+    │           └── calificacion: 5
+
+
+#FRONTEND
+
+
+proyecto-eventos-udb/
+│
+├── app/                          
+│   ├── _layout.tsx               # Root Layout y AuthProvider
+│   ├── (auth)/                   # Flujo Público
+│   │   ├── login.tsx             # Ingreso (Email/Pass + Google)
+│   │   └── register.tsx          # Formulario de registro
+│   │
+│   ├── (tabs)/                   # Flujo Privado (Barra Inferior)
+│   │   ├── _layout.tsx           
+│   │   ├── index.tsx             # Feed de eventos
+│   │   ├── create.tsx            # Crear/Editar evento
+│   │   └── stats.tsx             # Historial y Stats
+│   └── event/                    
+│       └── [id].tsx              # Detalle del evento (lógica condicional Organizador/Asistente)
+│
+├── src/                          
+│   ├── components/               # Tareas aisladas para el equipo (UI)
+│   ├── services/                 # firebaseConfig.ts
+│   └── types/                    # Interfaces TS
+│
+└── .env                          # Variables EXPO_PUBLIC_
