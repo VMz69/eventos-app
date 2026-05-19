@@ -104,7 +104,7 @@ export default function StatsScreen() {
             {promedio.toFixed(1)}
           </Text>
           <Text style={{ fontSize: 12, textAlign: "center" }}>
-            Puntuación que has dado
+            Calificación que has dado
           </Text>
         </View>
       </View>
