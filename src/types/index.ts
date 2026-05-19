@@ -21,6 +21,7 @@ export interface Evento {
 export interface Comentario {
   id?: string;
   usuarioId: string; // ID del usuario que comenta
+  usuarioNombre?: string;
   texto: string;
   calificacion: number; // 1 a 5
 }
