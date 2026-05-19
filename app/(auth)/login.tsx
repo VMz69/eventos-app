@@ -1,8 +1,13 @@
 import { Link } from "expo-router";
-import { signInWithEmailAndPassword } from "firebase/auth";
+import {
+  GoogleAuthProvider,
+  signInWithEmailAndPassword,
+  signInWithPopup,
+} from "firebase/auth";
+import { doc, getDoc, setDoc } from "firebase/firestore";
 import { useState } from "react";
-import { Alert, Button, Text, TextInput, View } from "react-native";
-import { auth } from "../../src/services/firebaseConfig";
+import { Alert, Button, Platform, Text, TextInput, View } from "react-native";
+import { auth, db } from "../../src/services/firebaseConfig";
 
 export default function LoginScreen() {
   const [email, setEmail] = useState("");
@@ -13,16 +18,43 @@ export default function LoginScreen() {
       return Alert.alert("Error", "Llena todos los campos");
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      // El _layout.tsx detectará el cambio y redirigirá automáticamente
     } catch (error: any) {
       Alert.alert("Error de Login", error.message);
     }
   };
 
-  const handleGoogleLogin = () => {
-    // Lo conectaremos en un paso posterior si decides configurar el Auth Session proxy,
-    // por ahora es un botón funcional en la UX.
-    Alert.alert("Info", "Login con Google en construcción");
+  const handleGoogleLogin = async () => {
+    // Si estás en el teléfono (Expo Go), bloquea el intento
+    if (Platform.OS !== "web") {
+      return Alert.alert(
+        "Aviso",
+        'El login con Google está configurado para pruebas en Web. Presiona "w" en la terminal de Expo para probarlo.',
+      );
+    }
+
+    try {
+      // 1. Abrir popup de Google (Solo funciona en Web)
+      const provider = new GoogleAuthProvider();
+      const userCredential = await signInWithPopup(auth, provider);
+      const user = userCredential.user;
+
+      // 2. Verificar si el usuario ya existe en Firestore
+      const userDoc = await getDoc(doc(db, "usuarios", user.uid));
+
+      // 3. Si es la primera vez que entra con Google, le creamos su perfil
+      if (!userDoc.exists()) {
+        await setDoc(doc(db, "usuarios", user.uid), {
+          nombre: user.displayName || "Usuario de Google",
+          email: user.email,
+          createdAt: new Date().toISOString(),
+        });
+      }
+
+      // El _layout.tsx detectará el cambio y redirigirá automáticamente al feed
+    } catch (error: any) {
+      console.error(error);
+      Alert.alert("Error", "Hubo un problema con el login de Google");
+    }
   };
 
   return (
@@ -59,7 +91,7 @@ export default function LoginScreen() {
       </View>
 
       <Link
-        href="/(auth)/register"
+        href={"/(auth)/register" as any}
         style={{ textAlign: "center", color: "blue", marginTop: 15 }}
       >
         ¿No tienes cuenta? Regístrate aquí

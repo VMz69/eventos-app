@@ -1,8 +1,13 @@
 // src/services/firebaseConfig.ts
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { getApp, getApps, initializeApp } from "firebase/app";
-import { getReactNativePersistence, initializeAuth } from "firebase/auth";
+import {
+  getAuth,
+  getReactNativePersistence,
+  initializeAuth,
+} from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
+import { Platform } from "react-native";
 
 const firebaseConfig = {
   apiKey: process.env.EXPO_PUBLIC_FIREBASE_API_KEY,
@@ -15,10 +20,17 @@ const firebaseConfig = {
 
 const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 
-// Aquí está la corrección: le decimos a Auth que guarde la sesión en el teléfono
-const auth = initializeAuth(app, {
-  persistence: getReactNativePersistence(AsyncStorage),
-});
+let auth: any;
+
+if (Platform.OS === "web") {
+  // En Web, Firebase maneja la persistencia solo
+  auth = getAuth(app);
+} else {
+  // En Móvil (Expo Go), obligamos a usar AsyncStorage
+  auth = initializeAuth(app, {
+    persistence: getReactNativePersistence(AsyncStorage),
+  });
+}
 
 const db = getFirestore(app);
 
