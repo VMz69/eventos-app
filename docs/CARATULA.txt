@@ -1,0 +1,19 @@
+UNIVERSIDAD DON BOSCO
+Dirección de Educación a Distancia
+--------------------------------------------------------
+MATERIA:
+Diseño y Programación de Software Multiplataforma DPS941 G01T (Virtual)
+--------------------------------------------------------
+DOCENTE:
+Alexander Alberto Sigüenza Campos.
+--------------------------------------------------------
+INTEGRANTES:
+VM251307 - Víctor Emmanuel Velasco Martínez  
+GH251230 - Fernando José Gómez Hernández
+AM252078 - José Eduardo Aquino Medrano 
+AV251709 - Milton Adalberto Ayala Ventura 
+MA251192 - William Eduardo Montano Aguilar
+--------------------------------------------------------
+LINK REPOSITORIO DE PROYECTO:
+https://github.com/VMz69/eventos-app.git
+--------------------------------------------------------
