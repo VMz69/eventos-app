@@ -129,14 +129,6 @@ export default function EventDetailScreen() {
 
   return (
     <ScrollView style={{ flex: 1, padding: 20 }}>
-      <View style={{ alignItems: "flex-start", marginBottom: 20 }}>
-        <Button
-          title="← Volver al Inicio"
-          onPress={() => router.back()}
-          color="#555"
-        />
-      </View>
-
       <Text style={{ fontSize: 24, fontWeight: "bold", marginBottom: 5 }}>
         {evento.titulo}
       </Text>
@@ -249,6 +241,14 @@ export default function EventDetailScreen() {
             <Text>{c.texto}</Text>
           </View>
         ))}
+
+        <View style={{ alignItems: "center", marginTop: 20 }}>
+          <Button
+            title="← Volver al Inicio"
+            onPress={() => router.back()}
+            color="#555"
+          />
+        </View>
       </View>
     </ScrollView>
   );

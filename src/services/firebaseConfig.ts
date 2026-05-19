@@ -1,9 +1,9 @@
 // src/services/firebaseConfig.ts
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { getApp, getApps, initializeApp } from "firebase/app";
-import { initializeAuth } from "firebase/auth";
+import { getReactNativePersistence, initializeAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 
-// Inyectamos las variables del .env
 const firebaseConfig = {
   apiKey: process.env.EXPO_PUBLIC_FIREBASE_API_KEY,
   authDomain: process.env.EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN,
@@ -13,13 +13,13 @@ const firebaseConfig = {
   appId: process.env.EXPO_PUBLIC_FIREBASE_APP_ID,
 };
 
-// Evitar inicializar múltiples veces con el Fast Refresh de Expo
 const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 
-// Inicializar Auth
-const auth = initializeAuth(app);
+// Aquí está la corrección: le decimos a Auth que guarde la sesión en el teléfono
+const auth = initializeAuth(app, {
+  persistence: getReactNativePersistence(AsyncStorage),
+});
 
-// Inicializar la base de datos NoSQL
 const db = getFirestore(app);
 
 export { app, auth, db };
