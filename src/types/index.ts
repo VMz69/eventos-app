@@ -16,6 +16,7 @@ export interface Evento {
   ubicacion: string;
   creadorId: string;
   asistentes: string[]; // Arreglo de strings (IDs de los usuarios que confirman)
+  createdAt?: string; // ISO 8601 — cuándo se creó el evento
 }
 
 export interface Comentario {
