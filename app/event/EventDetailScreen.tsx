@@ -1,28 +1,29 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
 import {
-  addDoc,
-  arrayUnion,
-  collection,
-  deleteDoc,
-  doc,
-  getDoc,
-  onSnapshot,
-  query,
-  updateDoc,
+    addDoc,
+    arrayUnion,
+    collection,
+    deleteDoc,
+    doc,
+    getDoc,
+    onSnapshot,
+    query,
+    updateDoc
 } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import {
-  ActivityIndicator,
-  Alert,
-  Button,
-  ScrollView,
-  Text,
-  TextInput,
-  View,
+    ActivityIndicator,
+    Alert,
+    Button,
+    ScrollView,
+    Text,
+    TextInput,
+    View
 } from "react-native";
 import { useAuth } from "../../src/context/AuthProvider";
 import { db } from "../../src/services/firebaseConfig";
 import { Comentario, Evento } from "../../src/types";
+
 
 export default function EventDetailScreen() {
   const { id } = useLocalSearchParams();
@@ -50,16 +51,16 @@ export default function EventDetailScreen() {
           Alert.alert("Aviso", "El evento ha sido eliminado");
           router.replace("/(tabs)");
         }
-      },
+      }
     );
 
     // 2. Escuchar los Comentarios (Sub-colección)
     const qComentarios = query(
-      collection(db, "eventos", id as string, "comentarios"),
+      collection(db, "eventos", id as string, "comentarios")
     );
     const unsubComentarios = onSnapshot(qComentarios, (snap) => {
       setComentarios(
-        snap.docs.map((d) => ({ id: d.id, ...d.data() }) as Comentario),
+        snap.docs.map((d) => ({ id: d.id, ...d.data() }) as Comentario)
       );
     });
 
@@ -102,7 +103,7 @@ export default function EventDetailScreen() {
     if (!textoComentario || isNaN(nota) || nota < 1 || nota > 5) {
       return Alert.alert(
         "Error",
-        "Ingresa texto y una calificación del 1 al 5",
+        "Ingresa texto y una calificación del 1 al 5"
       );
     }
     try {
@@ -150,13 +151,11 @@ export default function EventDetailScreen() {
           <Button
             title="Editar Evento"
             onPress={() => router.push(`/(tabs)/create?id=${evento.id}`)}
-            color="#4fb0b7"
-          />
+            color="#4fb0b7" />
           <Button
             title="Eliminar Evento"
             color="#d9534f"
-            onPress={handleDelete}
-          />
+            onPress={handleDelete} />
         </View>
       ) : (
         <View style={{ gap: 15 }}>
@@ -171,9 +170,9 @@ export default function EventDetailScreen() {
               ✓ Ya confirmaste tu asistencia
             </Text>
           ) : (
-            <Button title="Confirmar Asistencia" onPress={handleRSVP} 
-            color="#4fb0b7"/>
-            
+            <Button title="Confirmar Asistencia" onPress={handleRSVP}
+              color="#4fb0b7" />
+
           )}
 
           {/* SECCIÓN DE COMENTARIOS (Solo asistentes) */}
@@ -195,19 +194,16 @@ export default function EventDetailScreen() {
               value={calificacion}
               onChangeText={setCalificacion}
               keyboardType="numeric"
-              style={{ borderWidth: 1, padding: 10, marginBottom: 10 }}
-            />
+              style={{ borderWidth: 1, padding: 10, marginBottom: 10 }} />
             <Text>Comentario:</Text>
             <TextInput
               value={textoComentario}
               onChangeText={setTextoComentario}
-              style={{ borderWidth: 1, padding: 10, marginBottom: 10 }}
-            />
+              style={{ borderWidth: 1, padding: 10, marginBottom: 10 }} />
             <Button
               title="Publicar"
               onPress={handlePublicarComentario}
-              color="#555"
-            />
+              color="#555" />
           </View>
         </View>
       )}
@@ -249,8 +245,7 @@ export default function EventDetailScreen() {
           <Button
             title="← Volver al Inicio"
             onPress={() => router.back()}
-            color="#555"
-          />
+            color="#555" />
         </View>
       </View>
     </ScrollView>

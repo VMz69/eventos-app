@@ -167,6 +167,7 @@ export default function CreateScreen() {
       <Button
         title={id ? "Actualizar Evento" : "Guardar Evento"}
         onPress={handleSave}
+        color="#4fb0b7"
       />
     </View>
   );

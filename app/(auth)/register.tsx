@@ -2,7 +2,15 @@ import { Link } from "expo-router";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore";
 import { useState } from "react";
-import { Alert, Button, Text, TextInput, View } from "react-native";
+import {
+  Alert,
+  Image,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { auth, db } from "../../src/services/firebaseConfig";
 
 export default function RegisterScreen() {
@@ -11,70 +19,130 @@ export default function RegisterScreen() {
   const [password, setPassword] = useState("");
 
   const handleRegister = async () => {
-    if (!nombre || !email || !password)
+    if (!nombre || !email || !password) {
       return Alert.alert("Error", "Llena todos los campos");
+    }
 
     try {
-      // 1. Crear en Firebase Auth
       const userCredential = await createUserWithEmailAndPassword(
         auth,
         email,
-        password,
+        password
       );
+
       const user = userCredential.user;
 
-      // 2. Crear el documento en Firestore (Colección: usuarios)
       await setDoc(doc(db, "usuarios", user.uid), {
-        nombre: nombre,
-        email: email,
+        nombre,
+        email,
         createdAt: new Date().toISOString(),
       });
-
-      // El _layout.tsx redirigirá automáticamente al feed
     } catch (error: any) {
       Alert.alert("Error de Registro", error.message);
     }
   };
 
   return (
-    <View style={{ flex: 1, padding: 20, justifyContent: "center" }}>
-      <Text style={{ fontSize: 24, marginBottom: 20, textAlign: "center" }}>
-        Crear Cuenta
-      </Text>
+    <View style={styles.container}>
+      <Image
+        source={require("../../assets/images/logo.png")}
+        style={styles.logo}
+      />
 
-      <Text>Nombre Completo</Text>
+      <Text style={styles.title}>Crear Cuenta</Text>
+
+      <Text style={styles.label}>Nombre Completo</Text>
       <TextInput
         value={nombre}
         onChangeText={setNombre}
-        autoCapitalize="words"
-        style={{ borderWidth: 1, padding: 10, marginBottom: 15 }}
+        style={styles.input}
       />
 
-      <Text>Correo</Text>
+      <Text style={styles.label}>Correo</Text>
       <TextInput
         value={email}
         onChangeText={setEmail}
+        style={styles.input}
         keyboardType="email-address"
         autoCapitalize="none"
-        style={{ borderWidth: 1, padding: 10, marginBottom: 15 }}
       />
 
-      <Text>Contraseña</Text>
+      <Text style={styles.label}>Contraseña</Text>
       <TextInput
         value={password}
         onChangeText={setPassword}
         secureTextEntry
-        style={{ borderWidth: 1, padding: 10, marginBottom: 20 }}
+        style={styles.input}
       />
 
-      <Button title="Crear Cuenta" onPress={handleRegister} />
+      <TouchableOpacity style={styles.registerBtn} onPress={handleRegister}>
+        <Text style={styles.btnText}>CREAR CUENTA</Text>
+      </TouchableOpacity>
 
-      <Link
-        href="/(auth)/login"
-        style={{ textAlign: "center", color: "blue", marginTop: 20 }}
-      >
-        ¿Ya tienes cuenta? Inicia sesión
+      <Link href="/(auth)/login" asChild>
+        <Text style={styles.link}>
+          ¿Ya tienes cuenta? Iniciar sesión
+        </Text>
       </Link>
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#dcdcdc",
+    justifyContent: "center",
+    padding: 20,
+  },
+
+  logo: {
+    width: 150,
+    height: 150,
+    alignSelf: "center",
+    marginBottom: 10,
+    resizeMode: "contain",
+  },
+
+  title: {
+    fontSize: 22,
+    textAlign: "center",
+    marginBottom: 25,
+    fontWeight: "600",
+  },
+
+  label: {
+    fontSize: 14,
+    marginBottom: 5,
+    marginLeft: 5,
+  },
+
+  input: {
+    backgroundColor: "#eeeeee",
+    padding: 14,
+    borderRadius: 10,
+    marginBottom: 20,
+    elevation: 3,
+  },
+
+  registerBtn: {
+    backgroundColor: "#4fb0b7",
+    padding: 15,
+    borderRadius: 10,
+    alignItems: "center",
+    marginTop: 5,
+    marginBottom: 20,
+    elevation: 3,
+  },
+
+  btnText: {
+    color: "#fff",
+    fontWeight: "bold",
+  },
+
+  link: {
+    textAlign: "center",
+    color: "#007BFF",
+    fontSize: 14,
+  },
+});

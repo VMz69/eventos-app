@@ -6,7 +6,16 @@ import {
 } from "firebase/auth";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { useState } from "react";
-import { Alert, Button, Platform, Text, TextInput, View } from "react-native";
+import {
+  Alert,
+  Image,
+  Platform,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { auth, db } from "../../src/services/firebaseConfig";
 
 export default function LoginScreen() {
@@ -14,8 +23,10 @@ export default function LoginScreen() {
   const [password, setPassword] = useState("");
 
   const handleEmailLogin = async () => {
-    if (!email || !password)
+    if (!email || !password) {
       return Alert.alert("Error", "Llena todos los campos");
+    }
+
     try {
       await signInWithEmailAndPassword(auth, email, password);
     } catch (error: any) {
@@ -24,78 +35,129 @@ export default function LoginScreen() {
   };
 
   const handleGoogleLogin = async () => {
-    // Si estás en el teléfono (Expo Go), bloquea el intento
     if (Platform.OS !== "web") {
       return Alert.alert(
         "Aviso",
-        'El login con Google está configurado para pruebas en Web. Presiona "w" en la terminal de Expo para probarlo.',
+        'El login con Google solo funciona en web. Presiona "w" en Expo.'
       );
     }
 
     try {
-      // 1. Abrir popup de Google (Solo funciona en Web)
       const provider = new GoogleAuthProvider();
       const userCredential = await signInWithPopup(auth, provider);
       const user = userCredential.user;
 
-      // 2. Verificar si el usuario ya existe en Firestore
       const userDoc = await getDoc(doc(db, "usuarios", user.uid));
 
-      // 3. Si es la primera vez que entra con Google, le creamos su perfil
       if (!userDoc.exists()) {
         await setDoc(doc(db, "usuarios", user.uid), {
-          nombre: user.displayName || "Usuario de Google",
+          nombre: user.displayName || "Usuario",
           email: user.email,
           createdAt: new Date().toISOString(),
         });
       }
-
-      // El _layout.tsx detectará el cambio y redirigirá automáticamente al feed
-    } catch (error: any) {
-      console.error(error);
-      Alert.alert("Error", "Hubo un problema con el login de Google");
+    } catch (error) {
+      console.log(error);
+      Alert.alert("Error", "Hubo un problema con Google");
     }
   };
 
   return (
-    <View style={{ flex: 1, padding: 20, justifyContent: "center" }}>
-      <Text style={{ fontSize: 24, marginBottom: 20, textAlign: "center" }}>
-        ComunidadApp
-      </Text>
+    <View style={styles.container}>
+      <Image
+        source={require("../../assets/images/logo.png")}
+        style={styles.logo}
+      />
 
-      <Text>Correo</Text>
+      <Text style={styles.label}>Correo</Text>
       <TextInput
         value={email}
         onChangeText={setEmail}
+        style={styles.input}
         keyboardType="email-address"
         autoCapitalize="none"
-        style={{ borderWidth: 1, padding: 10, marginBottom: 15 }}
       />
 
-      <Text>Contraseña</Text>
+      <Text style={styles.label}>Contraseña</Text>
       <TextInput
         value={password}
         onChangeText={setPassword}
         secureTextEntry
-        style={{ borderWidth: 1, padding: 10, marginBottom: 20 }}
+        style={styles.input}
       />
 
-      <Button title="Iniciar Sesión" onPress={handleEmailLogin} />
+      <TouchableOpacity style={styles.loginBtn} onPress={handleEmailLogin}>
+        <Text style={styles.btnText}>INICIAR SESIÓN</Text>
+      </TouchableOpacity>
 
-      <View style={{ marginVertical: 20 }}>
-        <Button
-          title="G Continuar con Google"
-          color="#db4437"
-          onPress={handleGoogleLogin}
-        />
-      </View>
+      <TouchableOpacity style={styles.googleBtn} onPress={handleGoogleLogin}>
+        <Text style={styles.btnText}>CONTINUAR CON GOOGLE</Text>
+      </TouchableOpacity>
 
-      <Link
-        href={"/(auth)/register" as any}
-        style={{ textAlign: "center", color: "blue", marginTop: 15 }}
-      >
-        ¿No tienes cuenta? Regístrate aquí
+      <Link href={"/(auth)/register"} asChild>
+        <Text style={styles.link}>
+          ¿No tienes cuenta? Regístrate aquí
+        </Text>
       </Link>
     </View>
   );
 }
+// aqui cambie el stilo para como el de figma
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#dcdcdc",
+    justifyContent: "center",
+    padding: 20,
+  },
+
+  logo: {
+    width: 140,
+    height: 140,
+    alignSelf: "center",
+    marginBottom: 30,
+    resizeMode: "contain",
+  },
+
+  label: {
+    fontSize: 14,
+    marginBottom: 5,
+  },
+
+  input: {
+    backgroundColor: "#eee",
+    padding: 15,
+    borderRadius: 10,
+    marginBottom: 20,
+    elevation: 3,
+  },
+// ocupe el color aqua para que este conforme a toda la app
+  loginBtn: {
+    backgroundColor: "#4fb0b7",
+    padding: 15,
+    borderRadius: 10,
+    alignItems: "center",
+    marginBottom: 15,
+    elevation: 3,
+  },
+// aqui el boton google pero cre que solo fuciona en modo pc
+  googleBtn: {
+    backgroundColor: "#0b263b",
+    padding: 15,
+    borderRadius: 10,
+    alignItems: "center",
+    marginBottom: 20,
+    elevation: 3,
+  },
+
+  btnText: {
+    color: "#fff",
+    fontWeight: "bold",
+  },
+
+  link: {
+    textAlign: "center",
+    color: "#007BFF",
+    marginTop: 10,
+  },
+});

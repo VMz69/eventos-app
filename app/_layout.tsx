@@ -1,6 +1,6 @@
 import { Slot, useRouter, useSegments } from "expo-router";
 import { useEffect } from "react";
-import { ActivityIndicator, View } from "react-native";
+import { ActivityIndicator, Image, Text, View } from "react-native";
 import { AuthProvider, useAuth } from "../src/context/AuthProvider";
 
 const RootLayoutNav = () => {
@@ -11,27 +11,51 @@ const RootLayoutNav = () => {
   useEffect(() => {
     if (isLoading) return;
 
-    // Verifica si el usuario está en el grupo de rutas de autenticación
-    const inAuthGroup = segments[0] === ("(auth)" as string);
+    const inAuthGroup = segments[0] === "(auth)";
 
     if (!user && !inAuthGroup) {
-      // No hay usuario y trata de entrar a la app -> Al login
       router.replace("/(auth)/login");
     } else if (user && inAuthGroup) {
-      // Hay usuario y trata de ir al login -> Al inicio (tabs)
       router.replace("/(tabs)");
     }
   }, [user, isLoading, segments]);
 
   if (isLoading) {
     return (
-      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-        <ActivityIndicator size="large" />
+      <View
+        style={{
+          flex: 1,
+          justifyContent: "center",
+          alignItems: "center",
+          backgroundColor: "#f5f7fa",
+        }}
+      >
+        {/* LOGO */}
+        <Image
+          source={require("../assets/images/logo.png")}
+          style={{
+            width: 100,
+            height: 100,
+            marginBottom: 20,
+            resizeMode: "contain",
+          }}
+        />
+
+        <ActivityIndicator size="large" color="#4a90e2" />
+
+        <Text
+          style={{
+            marginTop: 10,
+            color: "#666",
+            fontSize: 14,
+          }}
+        >
+          Cargando aplicación...
+        </Text>
       </View>
     );
   }
 
-  // Renderiza la ruta actual
   return <Slot />;
 };
 
