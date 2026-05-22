@@ -56,6 +56,24 @@ export default function StatsScreen() {
     };
   }, [user]);
 
+  // ⭐ FUNCIÓN PARA MOSTRAR ESTRELLAS
+  const renderStars = (rating: number) => {
+    const fullStars = Math.floor(rating);
+    const halfStar = rating % 1 >= 0.5;
+
+    let stars = "";
+
+    for (let i = 0; i < fullStars; i++) {
+      stars += "⭐";
+    }
+
+    if (halfStar) {
+      stars += "✨"; // media estrella opcional
+    }
+
+    return stars;
+  };
+
   if (loading)
     return <ActivityIndicator size="large" style={{ marginTop: 50 }} />;
 
@@ -100,10 +118,17 @@ export default function StatsScreen() {
             alignItems: "center",
           }}
         >
+          {/* PROMEDIO NUMÉRICO */}
           <Text style={{ fontSize: 24, fontWeight: "bold", color: "#bb86fc" }}>
             {promedio.toFixed(1)}
           </Text>
-          <Text style={{ fontSize: 12, textAlign: "center" }}>
+
+          {/*  ESTRELLITAS */}
+          <Text style={{ fontSize: 18, marginTop: 5 }}>
+            {renderStars(promedio)}
+          </Text>
+
+          <Text style={{ fontSize: 12, textAlign: "center", marginTop: 5 }}>
             Calificación que has dado
           </Text>
         </View>

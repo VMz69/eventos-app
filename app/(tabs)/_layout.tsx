@@ -1,3 +1,4 @@
+import { Ionicons } from "@expo/vector-icons"; // 👈 AÑADIR
 import { Tabs, useRouter } from "expo-router";
 import { signOut } from "firebase/auth";
 import { Button, View } from "react-native";
@@ -10,6 +11,11 @@ export default function TabLayout() {
     <Tabs
       screenOptions={{
         headerShown: true,
+
+        // ESTO ES PARA COLOREAR EL ICONO ACTIVO DE AZULITO
+        tabBarActiveTintColor: "#4fb0b7",
+        tabBarInactiveTintColor: "#999",
+
         headerRight: () => (
           <View style={{ marginRight: 15 }}>
             <Button
@@ -21,22 +27,44 @@ export default function TabLayout() {
         ),
       }}
     >
-      <Tabs.Screen name="index" options={{ title: "Inicio" }} />
+      {/* icono INICIO */}
+      <Tabs.Screen
+        name="index"
+        options={{
+          title: "Inicio",
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="home" size={size} color={color} />
+          ),
+        }}
+      />
 
+      {/* icono CREAR */}
       <Tabs.Screen
         name="create"
-        options={{ title: "Crear Evento" }}
+        options={{
+          title: "Crear Evento",
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="add" size={size} color={color} />
+          ),
+        }}
         listeners={{
           tabPress: (e) => {
-            // 1. Evitamos que Expo restaure la memoria de la pestaña
             e.preventDefault();
-            // 2. Forzamos la navegación a la ruta exacta sin parámetros
             router.push("/(tabs)/create");
           },
         }}
       />
 
-      <Tabs.Screen name="stats" options={{ title: "Historial" }} />
+      {/* icono HISTORIAL */}
+      <Tabs.Screen
+        name="stats"
+        options={{
+          title: "Historial",
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="clipboard" size={size} color={color} />
+          ),
+        }}
+      />
     </Tabs>
   );
 }
