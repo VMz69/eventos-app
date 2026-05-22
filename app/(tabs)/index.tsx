@@ -9,6 +9,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { useAuth } from "../../src/context/AuthProvider";
 import { db } from "../../src/services/firebaseConfig";
 import { Evento } from "../../src/types";
 import { formatFecha, formatHora } from "../../src/utils/formatters";
@@ -16,6 +17,7 @@ import { formatFecha, formatHora } from "../../src/utils/formatters";
 export default function IndexScreen() {
   const [eventos, setEventos] = useState<Evento[]>([]);
   const router = useRouter();
+  const { user } = useAuth();
 
   useEffect(() => {
     const unsubscribe = onSnapshot(collection(db, "eventos"), (snapshot) => {
@@ -35,20 +37,26 @@ export default function IndexScreen() {
     return () => unsubscribe();
   }, []);
 
-  const renderItem = ({ item }: { item: Evento }) => (
-    <TouchableOpacity
-      style={styles.card}
-      onPress={() => router.push(`/event/${item.id}`)}
-    >
-      <Text style={styles.cardTitulo}>{item.titulo}</Text>
+  const renderItem = ({ item }: { item: Evento }) => {
+    const isMyEvent = user?.uid === item.creadorId;
 
-      <Text style={styles.cardMeta}>
-        {formatFecha(item.fecha)} • {formatHora(item.hora)}
-      </Text>
+    return (
+      <TouchableOpacity
+        style={styles.card}
+        onPress={() => router.push(`/event/${item.id}`)}
+      >
+        {isMyEvent && <Text style={styles.cardBadge}>tu evento</Text>}
 
-      <Text style={styles.cardUbicacion}>📍 {item.ubicacion}</Text>
-    </TouchableOpacity>
-  );
+        <Text style={styles.cardTitulo}>{item.titulo}</Text>
+
+        <Text style={styles.cardMeta}>
+          {formatFecha(item.fecha)} • {formatHora(item.hora)}
+        </Text>
+
+        <Text style={styles.cardUbicacion}>📍 {item.ubicacion}</Text>
+      </TouchableOpacity>
+    );
+  };
 
   return (
     <View style={styles.container}>
@@ -98,6 +106,7 @@ const styles = StyleSheet.create({
     color: "#888",
   },
   card: {
+    position: "relative",
     backgroundColor: "#ffffff",
     padding: 16,
     marginBottom: 12,
@@ -106,6 +115,19 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.08,
     shadowRadius: 5,
     elevation: 3,
+  },
+  cardBadge: {
+    position: "absolute",
+    top: 10,
+    right: 10,
+    backgroundColor: "#4a90e2",
+    color: "#fff",
+    paddingVertical: 2,
+    paddingHorizontal: 8,
+    borderRadius: 10,
+    fontSize: 12,
+    fontWeight: "600",
+    overflow: "hidden",
   },
   cardTitulo: {
     fontSize: 18,
