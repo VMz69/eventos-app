@@ -11,50 +11,68 @@ import { useAuth } from "../../src/context/AuthProvider";
 import { db } from "../../src/services/firebaseConfig";
 import { Comentario, Evento } from "../../src/types";
 
+type ComentarioConEvento = Comentario & { eventoId: string | undefined };
+
 export default function StatsScreen() {
   const { user } = useAuth();
 
   const [eventosAsistidos, setEventosAsistidos] = useState<Evento[]>([]);
+  const [todosLosComentarios, setTodosLosComentarios] = useState<
+    ComentarioConEvento[]
+  >([]);
   const [promedio, setPromedio] = useState<number>(0);
-  const [loading, setLoading] = useState(true);
+  const [loadingEventos, setLoadingEventos] = useState(true);
+  const [loadingComentarios, setLoadingComentarios] = useState(true);
 
+  // Escucha los eventos asistidos
   useEffect(() => {
     if (!user) return;
 
-    // 1. Obtener Eventos Asistidos
     const qEventos = query(
       collection(db, "eventos"),
       where("asistentes", "array-contains", user.uid),
     );
-    const unsubEventos = onSnapshot(qEventos, (snap) => {
+    return onSnapshot(qEventos, (snap) => {
       setEventosAsistidos(
         snap.docs.map((doc) => ({ id: doc.id, ...doc.data() }) as Evento),
       );
+      setLoadingEventos(false);
     });
+  }, [user]);
 
-    // 2. Obtener Promedio de Votos usando Collection Group
+  // Escucha todos los comentarios del usuario (en cualquier evento)
+  useEffect(() => {
+    if (!user) return;
+
     const qComentarios = query(
       collectionGroup(db, "comentarios"),
       where("usuarioId", "==", user.uid),
     );
-    const unsubComentarios = onSnapshot(qComentarios, (snap) => {
-      if (snap.empty) {
-        setPromedio(0);
-      } else {
-        let total = 0;
-        snap.forEach((doc) => {
-          total += (doc.data() as Comentario).calificacion;
-        });
-        setPromedio(total / snap.size);
-      }
-      setLoading(false);
+    return onSnapshot(qComentarios, (snap) => {
+      setTodosLosComentarios(
+        snap.docs.map((doc) => ({
+          ...(doc.data() as Comentario),
+          eventoId: doc.ref.parent.parent?.id,
+        })),
+      );
+      setLoadingComentarios(false);
     });
-
-    return () => {
-      unsubEventos();
-      unsubComentarios();
-    };
   }, [user]);
+
+  // Recalcula el promedio cruzando comentarios con eventos asistidos
+  useEffect(() => {
+    const eventosIds = new Set(eventosAsistidos.map((e) => e.id));
+    const relevantes = todosLosComentarios.filter((c) =>
+      eventosIds.has(c.eventoId),
+    );
+
+    if (relevantes.length === 0) {
+      setPromedio(0);
+    } else {
+      const total = relevantes.reduce((sum, c) => sum + c.calificacion, 0);
+      setPromedio(total / relevantes.length);
+    }
+  }, [eventosAsistidos, todosLosComentarios]);
 
   // ⭐ FUNCIÓN PARA MOSTRAR ESTRELLAS
   const renderStars = (rating: number) => {
@@ -74,7 +92,7 @@ export default function StatsScreen() {
     return stars;
   };
 
-  if (loading)
+  if (loadingEventos || loadingComentarios)
     return <ActivityIndicator size="large" style={{ marginTop: 50 }} />;
 
   return (
@@ -123,7 +141,7 @@ export default function StatsScreen() {
             {promedio.toFixed(1)}
           </Text>
 
-          {/*  ESTRELLITAS */}
+          {/* ESTRELLITAS */}
           <Text style={{ fontSize: 18, marginTop: 5 }}>
             {renderStars(promedio)}
           </Text>

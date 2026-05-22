@@ -4,12 +4,14 @@ import { useEffect, useState } from "react";
 import {
   FlatList,
   Image,
+  StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from "react-native";
 import { db } from "../../src/services/firebaseConfig";
 import { Evento } from "../../src/types";
+import { formatFecha, formatHora } from "../../src/utils/formatters";
 
 export default function IndexScreen() {
   const [eventos, setEventos] = useState<Evento[]>([]);
@@ -22,6 +24,11 @@ export default function IndexScreen() {
         ...doc.data(),
       })) as Evento[];
 
+      // Ordenar por fecha ascendente para mostrar los próximos primero
+      eventosData.sort((a, b) =>
+        `${a.fecha}T${a.hora}` < `${b.fecha}T${b.hora}` ? -1 : 1,
+      );
+
       setEventos(eventosData);
     });
 
@@ -30,87 +37,28 @@ export default function IndexScreen() {
 
   const renderItem = ({ item }: { item: Evento }) => (
     <TouchableOpacity
-      style={{
-        backgroundColor: "#ffffff",
-        padding: 16,
-        marginBottom: 12,
-        borderRadius: 12,
-        shadowColor: "#000",
-        shadowOpacity: 0.08,
-        shadowRadius: 5,
-        elevation: 3,
-      }}
+      style={styles.card}
       onPress={() => router.push(`/event/${item.id}`)}
     >
-      <Text style={{ fontSize: 18, fontWeight: "bold", color: "#333" }}>
-        {item.titulo}
+      <Text style={styles.cardTitulo}>{item.titulo}</Text>
+
+      <Text style={styles.cardMeta}>
+        {formatFecha(item.fecha)} • {formatHora(item.hora)}
       </Text>
 
-      <Text
-        style={{
-          color: "#4a90e2",
-          marginTop: 5,
-          fontSize: 14,
-        }}
-      >
-        {item.fecha} • {item.hora}
-      </Text>
-
-      <Text
-        style={{
-          color: "#666",
-          marginTop: 3,
-          fontSize: 13,
-        }}
-      >
-        📍 {item.ubicacion}
-      </Text>
+      <Text style={styles.cardUbicacion}>📍 {item.ubicacion}</Text>
     </TouchableOpacity>
   );
 
   return (
-    <View
-      style={{
-        flex: 1,
-        padding: 20,
-        backgroundColor: "#f5f7fa",
-      }}
-    >
+    <View style={styles.container}>
       {/* LOGO */}
-      <Image
-        source={require("../../assets/logo.png")}
-        style={{
-          width: 90,
-          height: 90,
-          alignSelf: "center",
-          marginBottom: 10,
-          resizeMode: "contain",
-        }}
-      />
+      <Image source={require("../../assets/logo.png")} style={styles.logo} />
 
-      <Text
-        style={{
-          fontSize: 24,
-          fontWeight: "bold",
-          marginVertical: 15,
-          textAlign: "center",
-          color: "#4a90e2",
-        }}
-      >
-        Eventos Próximos
-      </Text>
+      <Text style={styles.encabezado}>Eventos Próximos</Text>
 
       {eventos.length === 0 ? (
-        <Text
-          style={{
-            textAlign: "center",
-            marginTop: 30,
-            fontSize: 16,
-            color: "#888",
-          }}
-        >
-          No hay eventos. ¡Crea el primero!
-        </Text>
+        <Text style={styles.vacio}>No hay eventos. ¡Crea el primero!</Text>
       ) : (
         <FlatList
           data={eventos}
@@ -122,3 +70,56 @@ export default function IndexScreen() {
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    padding: 20,
+    backgroundColor: "#f5f7fa",
+  },
+  logo: {
+    width: 90,
+    height: 90,
+    alignSelf: "center",
+    marginBottom: 10,
+    resizeMode: "contain",
+  },
+  encabezado: {
+    fontSize: 24,
+    fontWeight: "bold",
+    marginVertical: 15,
+    textAlign: "center",
+    color: "#4a90e2",
+  },
+  vacio: {
+    textAlign: "center",
+    marginTop: 30,
+    fontSize: 16,
+    color: "#888",
+  },
+  card: {
+    backgroundColor: "#ffffff",
+    padding: 16,
+    marginBottom: 12,
+    borderRadius: 12,
+    shadowColor: "#000",
+    shadowOpacity: 0.08,
+    shadowRadius: 5,
+    elevation: 3,
+  },
+  cardTitulo: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#333",
+  },
+  cardMeta: {
+    color: "#4a90e2",
+    marginTop: 5,
+    fontSize: 14,
+  },
+  cardUbicacion: {
+    color: "#666",
+    marginTop: 3,
+    fontSize: 13,
+  },
+});
